@@ -1,96 +1,22 @@
-//const fs = require('fs');
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-// );
-// exports.checkID = (req, resp, next, val) => {
-//   console.log(`tour id is: ${val}`);
-// exports.checkBody = (req, resp, next) => {
-//   console.log(`tour Name is: ${req.body.name} and Price is: ${req.body.price}`);
-//   if (!req.body.name || !req.body.price) {
-//     return resp.status(400).json({
-//       status: 'fail. Bad request',
-//       message: 'Invalid Name or Price of rote',
-//     });
-//   }
-//   next();
-// };
-const { query } = require('express');
 const Tour = require('./../models/tourModel');
+const APIFeatures = require('./../utils/apiFeatures');
 
-// const testTour = new Tour({
-//   name: 'The park camper',
-//   price: 997,
-// });
-
-// testTour
-//   .save()
-//   .then((doc) => {
-//     console.log(doc);
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
-
-// if (req.params.id * 1 > tours.length) {
-//   return resp.status(404).json({
-//     status: 'fail',
-//     message: 'Invalid ID',
-//   });
-// }
-// next();
-// };
+exports.aliasTopTours = (req, resp, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
 
 exports.getAllTours = async (req, resp) => {
   try {
-    //build the query
-    //1a filtering
-    const queryObj = { ...req.query };
-
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    //1b advanced filtering
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    //console.log(JSON.parse(queryStr));
-    //console.log(req.query, queryObj);
-
-    let query = Tour.find(JSON.parse(queryStr));
-
-    //2 sort
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query.sort(sortBy);
-      //sort('price ratingsAverage' )
-    } else {
-      query.sort('-createdAt');
-    }
-
-    //3 field limiting
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    //4 pagination
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
-
-    //page=2&limit=10
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) throw new Error('This page does not exist');
-    }
-
     //execute query
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
     //query.sort().select().skip.Limit()
 
     // const tours = await Tour.find({
