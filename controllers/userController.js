@@ -2,6 +2,14 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el];
+  });
+  return newObj;
+};
+
 exports.getAllUsers = catchAsync(async (req, resp, next) => {
   const users = await User.find();
 
@@ -11,6 +19,34 @@ exports.getAllUsers = catchAsync(async (req, resp, next) => {
     results: users.length,
     data: {
       users,
+    },
+  });
+});
+
+exports.updateMe = catchAsync(async (req, resp, next) => {
+  // 1. create an error if user tries to update the password
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError(
+        'This route is not for password updates, please use update-password',
+        400
+      )
+    );
+  }
+
+  //2 filter unwanted fields from being updated
+  const filteredBody = filterObj(req.body, 'name', 'email');
+
+  // 3. update the user document
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  resp.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser,
     },
   });
 });

@@ -32,16 +32,22 @@ const userSchema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
+    required: [true, 'Please confirm your password'],
     validate: {
       validator: function (el) {
         return el === this.password;
       },
-      message: 'Passwords are not the same',
+      message: 'Passwords are not the same!',
     },
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpired: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -54,6 +60,13 @@ userSchema.pre('save', async function (next) {
   //Erase PasswordConfirm
   this.passwordConfirm = undefined;
 
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
@@ -72,7 +85,7 @@ userSchema.methods.ChangedPasswordAfter = function (JWTTimeStamp) {
     );
 
     //console.log(changedTimestamp, JWTTimeStamp);
-    return JWTTimeStamp < changedTimestamp; // 100<101
+    return JWTTimeStamp < changedTimestamp;
   }
 
   //not changed
