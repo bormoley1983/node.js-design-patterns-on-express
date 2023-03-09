@@ -57,6 +57,15 @@ exports.insretUser = (req, resp) => {
     .json({ status: 'error', massge: 'This route is not yet defined' });
 };
 
+exports.deleteMe = catchAsync(async (req, resp, next) => {
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+
+  resp.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 exports.getUserById = (req, resp) => {
   resp
     .status(500)
