@@ -14,12 +14,13 @@ const app = require('./app');
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
+  process.env.DATABASE_PASSWORD,
 );
 mongoose
-  //.connect(process.env.DATABASE_LOCAL, {
-  .connect(DB, {
-    useNewUrlParser: true,
+  .connect(process.env.DATABASE_LOCAL, {
+    //.connect(DB, {
+    useUnifiedTopology: true,
+    //useNewUrlParser: true,
     //useCreateIndex: true,
     //useFindAndMoify: false,
   })
