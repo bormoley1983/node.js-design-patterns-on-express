@@ -1,7 +1,7 @@
-const Tour = require('./../models/tourModel');
-const APIFeatures = require('./../utils/apiFeatures');
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
+const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 exports.aliasTopTours = (req, resp, next) => {
   req.query.limit = '5';
@@ -114,7 +114,11 @@ exports.getTourStats = catchAsync(async (req, resp, next) => {
 });
 
 exports.getMonthlyPlan = catchAsync(async (req, resp, next) => {
-  const year = req.params.year * 1;
+  const year = parseInt(req.params.year, 2);
+
+  if (Number.isNaN(year)) {
+    return next(new AppError('Please provide a valid year', 400));
+  }
 
   const plan = await Tour.aggregate([
     {
@@ -124,7 +128,7 @@ exports.getMonthlyPlan = catchAsync(async (req, resp, next) => {
       $match: {
         startDates: {
           $gte: new Date(`${year}-01-01`),
-          $lte: new Date(`${year + 1}-01-01`),
+          $lte: new Date(`${year}-12-31`),
         },
       },
     },
@@ -152,6 +156,7 @@ exports.getMonthlyPlan = catchAsync(async (req, resp, next) => {
       $limit: 12,
     },
   ]);
+
   resp.status(200).json({
     status: 'success',
     data: { plan },

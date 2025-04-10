@@ -1,7 +1,7 @@
 const express = require('express');
 
-const userController = require('./../controllers/userController');
-const authController = require('./../controllers/authController');
+const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.patch('/reset-password/:token', authController.resetPassword);
 router.patch(
   '/update-password',
   authController.protect,
-  authController.updatePassword
+  authController.updatePassword,
 );
 
 router.patch('/update-me', authController.protect, userController.updateMe);
@@ -33,7 +33,7 @@ router
   .delete(
     authController.protect,
     authController.restrictTo('admin'),
-    userController.removeUser
+    userController.removeUser,
   );
 
 module.exports = router;

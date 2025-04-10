@@ -1,4 +1,4 @@
-const AppError = require('./../utils/appError');
+const AppError = require('../utils/appError');
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
@@ -63,7 +63,11 @@ module.exports = (err, req, resp, next) => {
   if (process.env.NODE_ENV.trim() === 'development') {
     sendErrorDev(err, resp);
   } else if (process.env.NODE_ENV.trim() === 'production') {
-    let error = { ...err, name: err.name, code: err.code, errmsg: err.errmsg };
+    let error = {
+      name: err.name,
+      code: err.code,
+      errmsg: err.errmsg,
+    };
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidationError')

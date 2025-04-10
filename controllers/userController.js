@@ -1,6 +1,6 @@
-const User = require('./../models/userModel');
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
+const User = require('../models/userModel');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -29,8 +29,8 @@ exports.updateMe = catchAsync(async (req, resp, next) => {
     return next(
       new AppError(
         'This route is not for password updates, please use update-password',
-        400
-      )
+        400,
+      ),
     );
   }
 

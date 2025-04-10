@@ -1,23 +1,22 @@
 const crypto = require('crypto');
 const { promisify } = require('util');
-const User = require('./../models/userModel');
-const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
-const AppError = require('./../utils/appError');
-const sendEmail = require('./../utils/email');
+const User = require('../models/userModel');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
 
-const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const signToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-};
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
     expiresIn: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
   };
@@ -89,7 +88,7 @@ exports.protect = catchAsync(async (req, resp, next) => {
 
   if (!token) {
     return next(
-      new AppError('You are not logged in! Please login to get access', 401)
+      new AppError('You are not logged in! Please login to get access', 401),
     );
   }
 
@@ -101,14 +100,17 @@ exports.protect = catchAsync(async (req, resp, next) => {
   const freshUser = await User.findById(decoded.id);
   if (!freshUser) {
     return next(
-      new AppError('The user belonging to the token does not longer exist', 401)
+      new AppError(
+        'The user belonging to the token does not longer exist',
+        401,
+      ),
     );
   }
 
   //4 Check if user changed password after the JWT was issuet
   if (freshUser.ChangedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password! Please Login again', 401)
+      new AppError('User recently changed password! Please Login again', 401),
     );
   }
 
@@ -123,7 +125,7 @@ exports.restrictTo =
     //roles is an array ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError('You do not have permission to perform this action', 403),
       );
     }
     next();
@@ -142,7 +144,7 @@ exports.forgotPassword = catchAsync(async (req, resp, next) => {
 
   //send it back as an email
   const resetURL = `${req.protocol}://${req.get(
-    'host'
+    'host',
   )}/api/v1/users/reset-password/${resetToken}`;
 
   const message = `Forgot your password? submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you did not forget your password, please ignore this email!`;
@@ -158,16 +160,13 @@ exports.forgotPassword = catchAsync(async (req, resp, next) => {
       status: 'success',
       message: 'Token sent to email!',
     });
-  } catch {
-    err;
-  }
-  {
+  } catch (err) {
     user.passwordResetToken = undefined;
     user.passwordResetExpired = undefined;
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError('There was an error sending email. Try again later', 500)
+      new AppError('There was an error sending email. Try again later', 500),
     );
   }
 });

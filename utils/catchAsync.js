@@ -1,5 +1,3 @@
-module.exports = (fn) => {
-  return (req, resp, next) => {
-    fn(req, resp, next).catch(next);
-  };
+module.exports = (fn) => (req, resp, next) => {
+  fn(req, resp, next).catch(next);
 };
