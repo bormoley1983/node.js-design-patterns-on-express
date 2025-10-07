@@ -104,6 +104,21 @@ app.use((req, resp, next) => {
 
 //import routes
 
+// Root route - API information
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to Natours API!',
+    documentation: `${req.protocol}://${req.get('host')}/api-docs`,
+    endpoints: {
+      tours: `${req.protocol}://${req.get('host')}/api/v1/tours`,
+      users: `${req.protocol}://${req.get('host')}/api/v1/users`,
+      documentation: `${req.protocol}://${req.get('host')}/api-docs`
+    },
+    version: '1.0.0'
+  });
+});
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
