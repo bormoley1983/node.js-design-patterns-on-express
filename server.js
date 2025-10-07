@@ -7,7 +7,13 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-dotenv.config({ path: './config.env' });
+// Load config.env.local if it exists (for local development), otherwise config.env
+const fs = require('fs');
+if (fs.existsSync('./config.env.local')) {
+  dotenv.config({ path: './config.env.local' });
+} else {
+  dotenv.config({ path: './config.env' });
+}
 const app = require('./app');
 
 //console.log(process.env);
@@ -17,8 +23,7 @@ const app = require('./app');
 //   process.env.DATABASE_PASSWORD,
 // );
 mongoose
-  .connect(process.env.DATABASE_LOCAL, {
-    //.connect(DB, {
+  .connect(process.env.DATABASE, {
     useUnifiedTopology: true,
     //useNewUrlParser: true,
     //useCreateIndex: true,
