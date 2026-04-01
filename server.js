@@ -23,12 +23,7 @@ const app = require('./app');
 //   process.env.DATABASE_PASSWORD,
 // );
 mongoose
-  .connect(process.env.DATABASE, {
-    useUnifiedTopology: true,
-    //useNewUrlParser: true,
-    //useCreateIndex: true,
-    //useFindAndMoify: false,
-  })
+  .connect(process.env.DATABASE)
   .then(() => console.log('Connection Established!'));
 //  .catch((err) => console.log('ERROR!'));
 
