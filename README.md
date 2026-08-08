@@ -124,3 +124,6 @@ When contributing to this project:
 - Bcrypt for password hashing
 - Nodemailer for emails
 - And more...
+
+## OpenApi 
+[api-docs](http://localhost:3000/api-docs)
